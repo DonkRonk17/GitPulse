@@ -1,0 +1,237 @@
+================================================================================
+GITPULSE CHEAT SHEET - Multi-Repository Health Monitor v1.0.0
+================================================================================
+
+QUICK START
+-----------
+1. Clone: git clone https://github.com/DonkRonk17/GitPulse.git
+2. First run: python gitpulse.py scan .
+3. Help: python gitpulse.py --help
+
+================================================================================
+COMMON COMMANDS
+--------------------------------------------------------------------------------
+
+Scan All Repos:
+  python gitpulse.py scan /path/to/projects
+  python gitpulse.py scan . --verbose
+  python gitpulse.py scan . --format json
+  python gitpulse.py scan . --format md
+  python gitpulse.py scan . --sort name
+  python gitpulse.py scan . --sort age
+  python gitpulse.py scan . --depth 1
+
+Single Repo Status:
+  python gitpulse.py status ./MyRepo
+  python gitpulse.py status ./MyRepo --format json
+
+Find Dirty Repos:
+  python gitpulse.py dirty .
+  python gitpulse.py dirty /projects --format json
+
+Find Stale Repos:
+  python gitpulse.py stale .
+  python gitpulse.py stale . --days 60
+  python gitpulse.py stale . --days 90
+
+Check Remote Sync:
+  python gitpulse.py sync .
+  python gitpulse.py sync /projects --format json
+
+Branch Details:
+  python gitpulse.py branches ./MyRepo
+  python gitpulse.py branches ./MyRepo --format json
+
+Generate Report:
+  python gitpulse.py report .
+  python gitpulse.py report . --format md --output report.md
+  python gitpulse.py report . --format json --output data.json
+
+================================================================================
+CLI FLAGS & OPTIONS
+--------------------------------------------------------------------------------
+
+Global Options:
+  -h, --help         Show help message
+  --version          Show version number
+
+Scan/Report Options:
+  -v, --verbose      Show detailed issues per repo
+  -f, --format FMT   Output format: text (default), json, md
+  -d, --depth N      Max directory search depth (default: 3)
+  -s, --sort BY      Sort repos by: score (default), name, age
+
+Stale Options:
+  --days N           Days threshold (default: 30)
+
+Report Options:
+  -o, --output FILE  Save report to file
+
+================================================================================
+HEALTH SCORING
+--------------------------------------------------------------------------------
+
+Score Range:  0-100 points (start at 100, deduct for issues)
+
+Deductions:
+  No remote:         -15 pts
+  Uncommitted:       -10 pts
+  Untracked files:   -5 pts
+  Deleted files:     -5 pts
+  Behind remote:     -10 pts
+  Many unpushed:     -5 pts (>5 commits)
+  Stale (30-90d):    -10 pts
+  Very stale (90d+): -20 pts
+  Detached HEAD:     -5 pts
+  Merge conflicts:   -20 pts
+  No commits:        -30 pts
+  Pending stashes:   -3 pts
+
+Grades:
+  A = 90-100  (Excellent)
+  B = 80-89   (Good)
+  C = 70-79   (Fair)
+  D = 60-69   (Poor)
+  F = 0-59    (Critical)
+
+================================================================================
+PYTHON API
+--------------------------------------------------------------------------------
+
+Import:
+  from gitpulse import GitPulse
+
+Initialize:
+  pulse = GitPulse()
+  pulse = GitPulse(max_depth=5, timeout=30)
+
+Full Scan:
+  result = pulse.scan("/path/to/projects")
+  print(result.total_repos)
+  print(result.healthy_count)
+  for repo in result.repos:
+      print(f"{repo.name}: {repo.health_grade}")
+
+Single Repo:
+  status = pulse.get_status("/path/to/repo")
+  print(status.current_branch)
+  print(status.is_dirty)
+  print(status.health_score)
+
+Filters:
+  dirty = pulse.find_dirty("/path")
+  stale = pulse.find_stale("/path", days=30)
+  unsynced = pulse.find_unsynced("/path")
+  no_remote = pulse.find_no_remote("/path")
+
+Branches:
+  branches = pulse.get_branches("/path/to/repo")
+  for b in branches:
+      print(f"{b.name}: {b.last_commit_age_days}d old")
+
+Formatters:
+  from gitpulse import format_text, format_json, format_markdown
+  text = format_text(result, verbose=True)
+  json_str = format_json(result)
+  md = format_markdown(result)
+
+================================================================================
+OUTPUT FORMATS
+--------------------------------------------------------------------------------
+
+Text (default):
+  Human-readable terminal output
+  Use --verbose for detailed issues
+
+JSON:
+  Structured data for automation
+  Parse with jq, Python json, etc.
+  All fields included (RepoStatus, ScanResult)
+
+Markdown:
+  Table-based report format
+  Perfect for documentation and sharing
+  Includes summary, details, and issues sections
+
+================================================================================
+INTEGRATION WITH TEAM BRAIN TOOLS
+--------------------------------------------------------------------------------
+
+With SynapseLink (notifications):
+  from gitpulse import GitPulse
+  from synapselink import quick_send
+
+  pulse = GitPulse()
+  result = pulse.scan("/projects")
+  quick_send("TEAM", "Health Report", str(result.healthy_count))
+
+With AgentHealth (correlation):
+  from gitpulse import GitPulse
+  from agenthealth import AgentHealth
+
+  pulse = GitPulse()
+  health = AgentHealth()
+  result = pulse.scan("/projects")
+  health.log_metric("ATLAS", "repo_health", result.healthy_count)
+
+With TaskQueuePro (task creation):
+  from gitpulse import GitPulse
+  from taskqueuepro import TaskQueuePro
+
+  pulse = GitPulse()
+  queue = TaskQueuePro()
+  dirty = pulse.find_dirty("/projects")
+  for r in dirty:
+      queue.create_task(f"Commit changes in {r.name}", agent="ATLAS")
+
+================================================================================
+TROUBLESHOOTING
+--------------------------------------------------------------------------------
+
+Error: "git not found in PATH"
+  -> Install git: https://git-scm.com/downloads
+  -> Verify: git --version
+
+Error: Scan takes too long
+  -> Use --depth 1 to limit search depth
+  -> Scan a more specific subdirectory
+
+Error: Encoding issues on Windows
+  -> Run: chcp 65001
+  -> GitPulse auto-handles encoding in most cases
+
+Error: Timeout on large repos
+  -> Increase timeout: GitPulse(timeout=30)
+
+Error: Permission denied on some directories
+  -> GitPulse skips inaccessible directories gracefully
+  -> Run with appropriate permissions if needed
+
+================================================================================
+STATUS INDICATORS
+--------------------------------------------------------------------------------
+
+[OK]   = Healthy, no issues
+[!]    = Warning, minor issues
+[X]    = Critical or error
+clean  = No uncommitted changes
+dirty  = Has uncommitted changes
++N     = N commits ahead of remote (need push)
+-N     = N commits behind remote (need pull)
+no-remote = No remote configured
+CONFLICT = Merge conflicts present
+
+================================================================================
+RESOURCES
+--------------------------------------------------------------------------------
+
+Documentation:   AutoProjects/GitPulse/README.md
+Examples:        AutoProjects/GitPulse/EXAMPLES.md
+Integration:     AutoProjects/GitPulse/INTEGRATION_PLAN.md
+Quick Starts:    AutoProjects/GitPulse/QUICK_START_GUIDES.md
+GitHub:          https://github.com/DonkRonk17/GitPulse
+Issues:          https://github.com/DonkRonk17/GitPulse/issues
+
+================================================================================
+Built by ATLAS (Team Brain) | For Logan Smith / Metaphy LLC | Feb 2026
+================================================================================

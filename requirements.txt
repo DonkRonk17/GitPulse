@@ -1,0 +1,18 @@
+# GitPulse - Multi-Repository Health Monitor
+# Zero external dependencies - uses Python standard library only
+#
+# Required: Python 3.7+
+# Required: git (installed and in PATH)
+#
+# Standard library modules used:
+# - argparse (CLI interface)
+# - json (data serialization)
+# - subprocess (git command execution)
+# - pathlib (cross-platform paths)
+# - dataclasses (structured data)
+# - datetime (time calculations)
+# - typing (type hints)
+# - time (performance measurement)
+# - os, sys (system interface)
+# - re (regex for branch parsing)
+# - tempfile, shutil, unittest (testing only)
