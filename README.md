@@ -1,3 +1,5 @@
+<img width="1536" height="1024" alt="image" src="https://github.com/user-attachments/assets/b2f308ad-20af-4f33-ba8f-c5979f88928f" />
+
 # 🔍 GitPulse - Multi-Repository Health Monitor
 
 **Instant health checks for all your git repos. One command, total visibility.**
@@ -606,6 +608,9 @@ pulse = GitPulse(timeout=30)
 - **[INTEGRATION_EXAMPLES.md](INTEGRATION_EXAMPLES.md)** - Copy-paste integration code
 
 ---
+
+<img width="1536" height="1024" alt="image" src="https://github.com/user-attachments/assets/9ae64160-ecbe-4aae-a350-625752295afe" />
+
 
 ## 🤝 Contributing
 
