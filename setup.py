@@ -13,7 +13,7 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     author="ATLAS (Team Brain)",
-    author_email="logan@metaphy.com",
+    author_email="logan@metaphysicsandcomputing.com",
     url="https://github.com/DonkRonk17/GitPulse",
     py_modules=["gitpulse"],
     python_requires=">=3.7",
